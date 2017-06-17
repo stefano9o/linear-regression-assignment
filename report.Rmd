@@ -2,10 +2,41 @@
 title: "Final assignment"
 author: "Stefano Galeano"
 date: "29 maggio 2017"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## Context and questions
+
+You work for Motor Trend, a magazine about the automobile industry. Looking at a data set of a collection of cars, they are interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). They are particularly interested in the following two questions:
+
+“Is an automatic or manual transmission better for MPG”
+"Quantify the MPG difference between automatic and manual transmissions"
+
+### Data Overview
+
+The dataset is composed of 11 variables for each observation:
+
+* **mpg** fuel consumption [Miles/(US) gallon]
+* **cyl** number of cylinders (2,4 and 8)
+* **disp** Displacement (cu.in.)
+* **hp** wross horsepower
+* **drat** Rear axle ratio
+* **wt** weight [1000 lbs]
+* **qsec** 1/4 mile time
+* **vs**  engine type (0 = V, 1 = straight)
+* **am** transmission type (0 = automatic, 1 = manual)
+* **gear** number of forward gears
+* **carb** number of carburetors
+
+The first few rows of the dataset are shown below:
+
+```{r}
+head(mtcars)
+
+```
