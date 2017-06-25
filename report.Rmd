@@ -1,123 +1,156 @@
 ---
-title: "Regression analysis: impact of transmission type on consumption in cars"
+title: "Regression analysis: impact of transmission type on car consumption"
 author: "Stefano Galeano"
-date: "29 maggio 2017"
+date: "15 Giugno 2017"
 output:
-  pdf_document: default
+  pdf_document:
+        number_sections: true
+        fig_width: 4
+        fig_height: 3
+        fig_caption: true
   html_document: default
+geometry: margin=2cm
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Introduction
+# Introduction
 
-In the report it will be presented a regression analysis using R and in particular we are going to see how to interpret the values generated from the function `lm`.
-The case study taken as reference is the follow:
+In the report we're going to explain how to perform a simple regression analysis using the R built-in dataset  `mtcars`. In Particular we want to answer the following questions: 
 
-> Suppose we work for Motor Trend, a magazine about the automobile industry. Looking at a data set of a collection of cars `mtcars`, they are interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). They are particularly interested in the following two questions:
+> + Is an automatic or manual transmission better for MPG?
+> + Quantify the MPG difference between automatic and manual transmissions
 
-+ Is an automatic or manual transmission better for MPG?
-+ Quantify the MPG difference between automatic and manual transmissions
+The document is structured as follow: after having a look in the dataset, we're going to perform some basic exploratory analysis by computing the correlation matrix and showing a violing plot. In the following section we are going to perform some regression analysis, firstly using a one-variable model (`am`) and secondly adding other predictors in the model. We'll choose the varibles to include in the prevous step by using two different model-selection criteria like *VIF* and *Nested ANOVA* test. At the end we'll check the quality of the model using residual and his derivatives.
 
-Which are related to the null and alternative hypotesis as follow:
+<!-- Which are related to the null and alternative hypotesis as follow: -->
 
-+ **null hypotesis**: there is no impact in consumption respect using an automatic or manual transmission (diffrence in mean equal to 0)
-+ **alternative hypotesis** the transmission type is related to the consumption (difference in mean not equal to 0)
+<!-- + **null hypotesis**: there is no impact in consumption respect using an automatic or manual transmission (diffrence in mean equal to 0) -->
+<!-- + **alternative hypotesis** the transmission type is related to the consumption (difference in mean not equal to 0) -->
 
-### Data Overview
+# Data Overview
 
-The dataset is composed of eleven variables for each observation:
+The dataset is composed of eleven variables for each observation an the most interesting ones for our questions are:
 
 * *mpg*: fuel consumption [Miles/(US) gallon] **outcome**
-* *cyl*: number of cylinders (2,4 and 8)
+* *cyl*: number of cylinders (4,6 and 8)
 * *disp*: Displacement (cu.in.)
 * *hp*: wross horsepower
-* *drat*: Rear axle ratio
+<!-- * *drat*: Rear axle ratio -->
 * *wt* weight [1000 lbs]
-* *qsec*: 1/4 mile time
+<!-- * *qsec*: 1/4 mile time -->
 * *vs*:  engine type (0 = V, 1 = straight)
 * *am*: transmission type (0 = automatic, 1 = manual), **predictor**
-* *gear*: number of forward gears
+<!-- * *gear*: number of forward gears -->
 * *carb*: number of carburetors
 
 and the first few rows of the dataset are shown below:
 
 ```{r}
+nonFactorVars <- c("mpg","cyl","disp","hp","wt","vs","carb")
+factorVars <- c("am")
 # save into a local variable the dataframe
-Mtcars.df <- mtcars
-# coerce the categorical variables into R factor variables
-factorVars <- c("vs","am")
-Mtcars.df[,factorVars] <- lapply(Mtcars.df[,factorVars], factor)
+Mtcars.df <- mtcars[,c(nonFactorVars,factorVars)]
+# coerce the categorical variables rappresented as numerical into R factor variables
+Mtcars.df[factorVars] <- lapply(Mtcars.df[factorVars], factor)
 
-head(Mtcars.df,3)
+head(Mtcars.df,5)
 ```
+where we decided to treat `cyl` and `carb` as non categorical variable since that their values has an intrinsec order and the distance between defferent values as well: for instance 4 cylinders are less then 6 and the difference between 4 and 6 cylinders is in some sense less then the difference between 4 and 8 cylinders.
 
-## Exploratory data analysis
+# Exploratory data analysis
 
-Firstly, we want to analize the relation between `mpg` and `am` by themselves using a violin plot:
+Initially, we want to analize the distribution of the car consumption `mpg` for the two group of `am`. We are using a violing plot because is a combination of the bocplot and an histogram and give us more information in one fell swoop:
 
 ```{r}
 library(ggplot2)
 
 g1 <- ggplot(Mtcars.df,aes(x = am, y = mpg, fill = am))
 g1 <- g1 + geom_violin(color = "black")
+g1 <- g1 + scale_x_discrete(breaks=c("0","1"),
+                            labels=c("Automatic", "Manual"))
 g1 <- g1 + geom_point()
-g1 <- g1 + xlab("transmission type")
+g1 <- g1 + xlab("Transmission type")
+g1 <- g1 + ylab("Consummption [Miles / US Gallon]")
 g1
 ```
 
-and even now it seems to be a clear distinction for the two groups.
+and we can obsereve that it seems to be a clear distinction for the two groups: the mean and the variance are higher for the the manual group respect to the automatic one.  
 
-Secondly, we'are going to analize the correlation between the non-categorical variables in order to understand which variables include in the model using the function `corrplot`;
+Secondly, we'are going to calculate the correlation between the non-categorical variables in order to understand which variables make sense to include in the multivariable model.
 
-```{r}
-
+```{r, fig.height=4}
 library(corrplot)
 
-M <- cor(Mtcars.df[-which(names(Mtcars.df) %in% factorVars)])
+M <- cor(Mtcars.df[nonFactorVars])
 corrplot(M, method="circle")
 ```
 
-where the meaning of the colors is: more the dos are `blue` or `red` more the two variable are correlated. We can see how `corplot` give a visual understanding of the correlation between couple of variables using colors and we can use it to choose which variable may be added into the model, paying attention to do not insert predicors higly corellated between them because it leads to the multicollinearity problem.
+where more the dots are `blue`/`red` more the two variable are positevely/negatevely correlated. We've used the `corplot` instead of the `cor` function since that the use of the colors give a better and immediate understanding of the correlation between couple of variables. 
 
-From the correlation matrix we can note that:
+We're using the output of `corplot` in order to choose which variable may be added into the model. We'll see in the next section two criteria that can bu used in order to avoid the well-knonw problem of variance inflation i.e. the conseguences of including predicors higly corellated each other.
 
-+ `wt`, `dispd`, `cyl` and `hp` seem to be the most correlated variables with `mpg` which leads us to candidate them as possible predicor variables;
-+ `disp` and `cyl` are highly correlated, in fact exists a matematical relation between them, and we want to spear to include both in the model.
+From the correlation plot we can note that:
 
-After performing some analysis, here omitted for brevity, it seems to be reasonable to include in the model: `am`,`wt`,`cyl`, and `hp`.
++ `wt`, `disp`, `cyl` and `hp` are highly with `mpg`, which leads us to candidate them as possible predicor variables;
++ `disp` is highly correlated `cyl`, in fact exists a matematical relation between them, and we want to spear to include both in the model.
 
 ### Statistical inference
+
+The main goal of statiscal inference is to draw conclusion from a set of data affected by errors. In the next two section we're going to use linear models in order to answer our questions.
+The main feature of linear model is to be parsimonious, and for this reason, we are inerested in including as less variables as possible.  
 
 ## One-variable linear regression
 
 Before construct a multivariable linear regression model, it's a good practice to start with a simple linear regression model and here below is shown the result of the `summary function`: 
-```{r}
-Mtcars.fitSimple <- lm(mpg ~ am, Mtcars.df)
-Mtcars.sumSimple <- summary(Mtcars.fitSimple)
-# Mtcars.sumSimple$coefficients
-# data.frame("Residual standard error" = Mtcars.sumSimple$sigma, "Adjusted R square" = Mtcars.sumSimple$adj.r.squared)
-# summary(Mtcars.fitSimple)$res.se
 
-str
+```{r, echo=FALSE}
+Mtcars.fitSimple <- lm(mpg ~ am, Mtcars.df)
+```
+
+```{r}
+summary(Mtcars.fitSimple)
 ```
 
 whose values are interpreted as follow:
-+ **intercept**: `17.147` and `1.125` the mean and the standard error for the refernce level (automatic group)
-+ **am1**: `7.245` and `1.764` the mean and the stardard error for the difference in mean for the manual group respect to the reference level (automatic group)    
-Also the p-value `0.000285` is statistically significant, i.e. the observed difference in mean `7.245` it was by pure chance is very low. 
+* **Residuals**: they should be normal distributed with mean `0` and at first sight they seems to be symmetric respect `0` anyway we'll plot them later  
++ **(Intercept)**: `17.147` and `1.125` are the *estimate* and the *standard error* for the reference level (automatic group)
++ **am1**: `7.245` and `1.764` are the *estimate* and the *stardard error* for the increase in mean for the manual group respect to the reference level (automatic group): `0.000285` is the *p-value* and since it is much more less then `0.05` we can tate that it is statistically significant i.e. this means that the observed difference in mean `7.245` it was by pure chance is very low. 
 
-## Multivariate linear regression
+# Multivariate linear regression
 
-The solution provided from the simple linear regression model it's sufficient in many scenarios, however there are some context in which we want to be as accurate as possible. In addition we know from the theory how omititng important variables in a model can drammatically change the solution leading to wrong conclusion.
+The solution provided from the simple linear regression model it's sufficient in many scenarios and could allow us to answwer the first question. Of course this is true only if we are not ommtting any umportant variable, in fact we know from the theorythat can drammatically change the solution leading to wrong conclusion. 
+
+Hhowever we're interested in answering also the second question, i.e. we want to quantify our statement, and to be as accurate as possible.
 
 ## Model selection
 
-```{r}
+Using the candidate variables from the *Exploratory Data Analysis* section we're going to create different model and using criteria like *VIF* and *Nested ANOVA test* we want to discover which variables have a good impact and a low inflation in the solution.
 
+### Variance Inflation Factor
+
+The *VIF* with refernce to a predictor $$x_i$$ measures the ratio between the model with all predictors and the model constructed using the predictor $$x_i$$ and the other
+
+
+
+we're going to create different nested model ($$predictors(model_i) \subset predictors(model_{i+1}),  \forall i \in \{1,2,3,4\} $$) and by using the `anova` function we can see how much significant is including that variable: 
+
+```{r, echo=FALSE}
+fit1 <- lm(mpg ~ am, Mtcars.df)
+fit2 <- lm(mpg ~ am + disp, Mtcars.df)
+fit3 <- lm(mpg ~ am + disp + cyl, Mtcars.df)
+fit4 <- lm(mpg ~ am + disp + cyl + hp, Mtcars.df)
+fit5 <- lm(mpg ~ am + disp + cyl + hp + wt, Mtcars.df)
 ```
+
+ 
+```{r}
+anova(fit1, fit2, fit3, fit4, fit5)
+```
+
+
 
 
 
@@ -175,18 +208,10 @@ str(Mtcars.df)
 
 library(GGally) 
 
-g = ggpairs(Mtcars.df, lower = list(continuous = "smooth", discrete = "facetbar", combo = "dot_no_facet"),columns = c(2,1,8,4,9), showStrips = TRUE, axisLabels = "show")
+g = ggpairs(Mtcars.df, lower = list(continuous = "smooth", discrete = "facetbar", combo = "dot_no_facet"),columns = c(nonFactorVars, factorVars), showStrips = TRUE, axisLabels = "show")
 g
 
 g <- ggplot(Mtcars.df,aes(x = disp, y = mpg, color = am))
-g <- g + geom_point()
-g
-
-g <- ggplot(Mtcars.df,aes(x = disp, y = mpg, color = vs))
-g <- g + geom_point()
-g
-
-g <- ggplot(Mtcars.df,aes(x = disp, y = mpg, color = carb))
 g <- g + geom_point()
 g
 ```
@@ -211,7 +236,7 @@ anova(fit, fitDisp)
 
 ```
 
-
+# Conclusione
 
 
 
