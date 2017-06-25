@@ -89,17 +89,17 @@ From the correlation matrix we can note that:
 
 After performing some analysis, here omitted for brevity, it seems to be reasonable to include in the model: `am`,`wt`,`cyl`, and `hp`.
 
-### Regression analysis
+### Statistical inference
 
-## Simple linear regression
+## One-variable linear regression
 
 Before construct a multivariable linear regression model, it's a good practice to start with a simple linear regression model and here below is shown the result of the `summary function`: 
 ```{r}
 Mtcars.fitSimple <- lm(mpg ~ am, Mtcars.df)
 Mtcars.sumSimple <- summary(Mtcars.fitSimple)
-Mtcars.sumSimple$coefficients
-data.frame("Residual standard error" = Mtcars.sumSimple$sigma, "Adjusted R square" = Mtcars.sumSimple$adj.r.squared)
-summary(Mtcars.fitSimple)$res.se
+# Mtcars.sumSimple$coefficients
+# data.frame("Residual standard error" = Mtcars.sumSimple$sigma, "Adjusted R square" = Mtcars.sumSimple$adj.r.squared)
+# summary(Mtcars.fitSimple)$res.se
 
 str
 ```
@@ -113,11 +113,27 @@ Also the p-value `0.000285` is statistically significant, i.e. the observed diff
 
 The solution provided from the simple linear regression model it's sufficient in many scenarios, however there are some context in which we want to be as accurate as possible. In addition we know from the theory how omititng important variables in a model can drammatically change the solution leading to wrong conclusion.
 
+## Model selection
+
+```{r}
+
+```
+
+
+
 For these reason and for the consideration made in the section *Exploratory data analysis*, we are going to add `am`,`wt`,`cyl`, and `hp` in the model:
 
 ```{r}
-Mtcars.fitAll <- lm(mpg ~ am + wt + cyl + hp, Mtcars.df)
+fit1 <- lm(mpg ~ am, Mtcars.df)
+fit2 <- lm(mpg ~ am + wt, Mtcars.df)
+fit3 <- lm(mpg ~ am + wt + cyl, Mtcars.df)
+fit4 <- lm(mpg ~ am + wt + cyl + hp, Mtcars.df)
+anova(fit1, fit2, fit3, fit4)
+
+Mtcars.fitAll <- lm(mpg ~ am * wt + cyl, Mtcars.df)
 summary(Mtcars.fitAll)
+
+plot(Mtcars.fitAll)
 ```
 
 + decrease in residual stand error
