@@ -1,5 +1,5 @@
 ---
-title: "Final assignment"
+title: "Regression analysis: impact of transmission type on consumption in cars"
 author: "Stefano Galeano"
 date: "29 maggio 2017"
 output:
@@ -11,32 +11,194 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Context and questions
+## Introduction
 
-You work for Motor Trend, a magazine about the automobile industry. Looking at a data set of a collection of cars, they are interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). They are particularly interested in the following two questions:
+In the report it will be presented a regression analysis using R and in particular we are going to see how to interpret the values generated from the function `lm`.
+The case study taken as reference is the follow:
 
-“Is an automatic or manual transmission better for MPG”
-"Quantify the MPG difference between automatic and manual transmissions"
+> Suppose we work for Motor Trend, a magazine about the automobile industry. Looking at a data set of a collection of cars `mtcars`, they are interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). They are particularly interested in the following two questions:
+
++ Is an automatic or manual transmission better for MPG?
++ Quantify the MPG difference between automatic and manual transmissions
+
+Which are related to the null and alternative hypotesis as follow:
+
++ **null hypotesis**: there is no impact in consumption respect using an automatic or manual transmission (diffrence in mean equal to 0)
++ **alternative hypotesis** the transmission type is related to the consumption (difference in mean not equal to 0)
 
 ### Data Overview
 
-The dataset is composed of 11 variables for each observation:
+The dataset is composed of eleven variables for each observation:
 
-* **mpg** fuel consumption [Miles/(US) gallon]
-* **cyl** number of cylinders (2,4 and 8)
-* **disp** Displacement (cu.in.)
-* **hp** wross horsepower
-* **drat** Rear axle ratio
-* **wt** weight [1000 lbs]
-* **qsec** 1/4 mile time
-* **vs**  engine type (0 = V, 1 = straight)
-* **am** transmission type (0 = automatic, 1 = manual)
-* **gear** number of forward gears
-* **carb** number of carburetors
+* *mpg*: fuel consumption [Miles/(US) gallon] **outcome**
+* *cyl*: number of cylinders (2,4 and 8)
+* *disp*: Displacement (cu.in.)
+* *hp*: wross horsepower
+* *drat*: Rear axle ratio
+* *wt* weight [1000 lbs]
+* *qsec*: 1/4 mile time
+* *vs*:  engine type (0 = V, 1 = straight)
+* *am*: transmission type (0 = automatic, 1 = manual), **predictor**
+* *gear*: number of forward gears
+* *carb*: number of carburetors
 
-The first few rows of the dataset are shown below:
+and the first few rows of the dataset are shown below:
 
 ```{r}
-head(mtcars)
+# save into a local variable the dataframe
+Mtcars.df <- mtcars
+# coerce the categorical variables into R factor variables
+factorVars <- c("vs","am")
+Mtcars.df[,factorVars] <- lapply(Mtcars.df[,factorVars], factor)
+
+head(Mtcars.df,3)
+```
+
+## Exploratory data analysis
+
+Firstly, we want to analize the relation between `mpg` and `am` by themselves using a violin plot:
+
+```{r}
+library(ggplot2)
+
+g1 <- ggplot(Mtcars.df,aes(x = am, y = mpg, fill = am))
+g1 <- g1 + geom_violin(color = "black")
+g1 <- g1 + geom_point()
+g1 <- g1 + xlab("transmission type")
+g1
+```
+
+and even now it seems to be a clear distinction for the two groups.
+
+Secondly, we'are going to analize the correlation between the non-categorical variables in order to understand which variables include in the model using the function `corrplot`;
+
+```{r}
+
+library(corrplot)
+
+M <- cor(Mtcars.df[-which(names(Mtcars.df) %in% factorVars)])
+corrplot(M, method="circle")
+```
+
+where the meaning of the colors is: more the dos are `blue` or `red` more the two variable are correlated. We can see how `corplot` give a visual understanding of the correlation between couple of variables using colors and we can use it to choose which variable may be added into the model, paying attention to do not insert predicors higly corellated between them because it leads to the multicollinearity problem.
+
+From the correlation matrix we can note that:
+
++ `wt`, `dispd`, `cyl` and `hp` seem to be the most correlated variables with `mpg` which leads us to candidate them as possible predicor variables;
++ `disp` and `cyl` are highly correlated, in fact exists a matematical relation between them, and we want to spear to include both in the model.
+
+After performing some analysis, here omitted for brevity, it seems to be reasonable to include in the model: `am`,`wt`,`cyl`, and `hp`.
+
+### Regression analysis
+
+## Simple linear regression
+
+Before construct a multivariable linear regression model, it's a good practice to start with a simple linear regression model and here below is shown the result of the `summary function`: 
+```{r}
+Mtcars.fitSimple <- lm(mpg ~ am, Mtcars.df)
+Mtcars.sumSimple <- summary(Mtcars.fitSimple)
+Mtcars.sumSimple$coefficients
+data.frame("Residual standard error" = Mtcars.sumSimple$sigma, "Adjusted R square" = Mtcars.sumSimple$adj.r.squared)
+summary(Mtcars.fitSimple)$res.se
+
+str
+```
+
+whose values are interpreted as follow:
++ **intercept**: `17.147` and `1.125` the mean and the standard error for the refernce level (automatic group)
++ **am1**: `7.245` and `1.764` the mean and the stardard error for the difference in mean for the manual group respect to the reference level (automatic group)    
+Also the p-value `0.000285` is statistically significant, i.e. the observed difference in mean `7.245` it was by pure chance is very low. 
+
+## Multivariate linear regression
+
+The solution provided from the simple linear regression model it's sufficient in many scenarios, however there are some context in which we want to be as accurate as possible. In addition we know from the theory how omititng important variables in a model can drammatically change the solution leading to wrong conclusion.
+
+For these reason and for the consideration made in the section *Exploratory data analysis*, we are going to add `am`,`wt`,`cyl`, and `hp` in the model:
+
+```{r}
+Mtcars.fitAll <- lm(mpg ~ am + wt + cyl + hp, Mtcars.df)
+summary(Mtcars.fitAll)
+```
+
++ decrease in residual stand error
++ increase in R-squared
+
++ interpreation cyl
+```{r}
+library(ggplot2)
+g1 <- ggplot(Mtcars.df,aes(Mtcars.fitAll$fitted.values,Mtcars.fitAll$residuals))
+g1 <- g1 + geom_point()
+g1 <- g1 + xlab("AM fitted")
+g1
+
+#centering variable
+Mtcars.df$cyl.c <- Mtcars.df$cyl - median(Mtcars.df$cyl)
+fit2 <- lm(mpg ~ am + cyl.c, Mtcars.df)
+summary(fit2)
+
+g2 <- ggplot(Mtcars.df,aes(fit2$fitted.values,fit2$residuals))
+g2 <- g2 + geom_point()
+g2 <- g2 + xlab("AM and CYL fitted")
+g2
+
+Mtcars.df$disp.c <- Mtcars.df$disp - mean(Mtcars.df$disp)
+fit3 <- lm(mpg ~ am + disp.c, Mtcars.df)
+summary(fit3)
+
+g3 <- ggplot(Mtcars.df,aes(fit3$fitted.values,fit3$residuals))
+g3 <- g3 + geom_point()
+g3 <- g3 + xlab("AM and DISP fitted")
+g3
+
+pt(q = coef(summary(Mtcars.fitAll))[1,3],df = 29,lower.tail = FALSE)
+```
+
+
+```{r fig.height=6}
+str(Mtcars.df)
+
+library(GGally) 
+
+g = ggpairs(Mtcars.df, lower = list(continuous = "smooth", discrete = "facetbar", combo = "dot_no_facet"),columns = c(2,1,8,4,9), showStrips = TRUE, axisLabels = "show")
+g
+
+g <- ggplot(Mtcars.df,aes(x = disp, y = mpg, color = am))
+g <- g + geom_point()
+g
+
+g <- ggplot(Mtcars.df,aes(x = disp, y = mpg, color = vs))
+g <- g + geom_point()
+g
+
+g <- ggplot(Mtcars.df,aes(x = disp, y = mpg, color = carb))
+g <- g + geom_point()
+g
+```
+
+
+```{r}
+fit <- lm(mpg ~ am + hp + wt + cyl, mtcars)
+
+summary(fit)
 
 ```
+
+
+
+```{r}
+fit <- lm(mpg ~ am + hp + wt, mtcars)
+fitCyl <- lm(mpg ~ am + hp + wt + cyl, mtcars)
+fitDisp <- lm(mpg ~ am + hp + wt + disp, mtcars)
+
+anova(fit, fitCyl)
+anova(fit, fitDisp)
+
+```
+
+
+
+
+
+
+
+
