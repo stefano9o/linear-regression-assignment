@@ -1,7 +1,7 @@
 ---
-title: "Regression analysis: impact of transmission type on car consumption"
+title: "Impact of transmission type on car consumption"
 author: "Stefano Galeano"
-date: "15 Giugno 2017"
+date: "1 July 2017"
 output:
   pdf_document:
         number_sections: true
