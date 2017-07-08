@@ -18,12 +18,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction
 
-In the report we're going to explain how to perform a simple regression analysis using the R built-in dataset  `mtcars`. In Particular we want to answer the following questions: 
+In the report we're going to perform a simple regression analysis using `mtcars`, an R built-in dataset. In Particular we are interested in the following questions: 
 
 > + Is an automatic or manual transmission better for MPG?
 > + Quantify the MPG difference between automatic and manual transmissions
 
-The document is structured as follow: after having a look in the dataset, we're going to perform some basic exploratory analysis by computing the correlation matrix and showing a violing plot. In the following section we are going to perform some regression analysis, firstly using a one-variable model (`am`) and secondly adding other predictors in the model. We'll choose the varibles to include in the prevous step by using two different model-selection criteria like *VIF* and *Nested ANOVA* test. At the end we'll check the quality of the model using residual and his derivatives.
+The document is structured as follow: after having a look in the dataset, we're going to perform some basic exploratory analysis by computing the correlation matrix and showing a violin plot. In the following section we are going to perform some regression analysis, firstly using a one-variable model (`am`) and secondly adding other predictors to the model. We'll choose the varibles to include in the prevous step by using two different model-selection criteria: *VIF* and *Nested ANOVA* test. At the end we'll check the quality of the model using residual and his derivatives.
 
 <!-- Which are related to the null and alternative hypotesis as follow: -->
 
