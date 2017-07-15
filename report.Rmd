@@ -224,3 +224,4 @@ head(Mtcars.hatvalues[order(Mtcars.hatvalues)])
 
 # Conclusion
 
+We've performed some exploratory analysis which has been used to find the variables to include in the model. We did a simple regression and a multivariable regression analysis which led us to conclude that even if the automatic transmission implies a less consumption, the difference `0.177` with a p-value of `0,89` is not statistically significant. The result considerably changes after taking into account of the weight `wt` and the number of cylinders `cyl`. We finally performed a residual analysis and a diagnostic with which we didn't find any noteworthy problem since the residuals didn't show particular pattern and here are no hatvalues significantly different from the others
