@@ -64,11 +64,11 @@ The first few rows of the dataset are shown below:
 head(Mtcars.df)
 ```
 
-where `am` 0 means automatic and 1 means manual transmission. We want to point out that we decided to treat `cyl` and `carb` as non categorical variable since their values have an intrinsic order and the distance between defferent values as well (for instance 4 cylinders are less then 6 and the difference between 4 and 6 cylinders is in some sense less then the difference between 4 and 8 cylinders).
+where `am` 0 means automatic and 1 means manual transmission. We want to point out that we decided to treat `cyl` and `carb` as non-categorical variable since their values have an intrinsic order and the distance between different is important (for instance 4 cylinders are less than 6 and the difference between 4 and 6 cylinders is less than the difference between 4 and 8 cylinders).
 
 # Exploratory data analysis
 
-Initially, we want to analize the distribution of the car consumption `mpg` for the two group of `am`. We are using a violin plot because is a combination of the boxplot and an histogram and give us more information in one fell swoop:
+Initially, we want to analyse the distribution of the car consumption `mpg` for the two group manual/automatic:
 
 ```{r echo=FALSE}
 library(ggplot2)
