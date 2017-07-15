@@ -117,7 +117,7 @@ fit5 <- lm(mpg ~ am + wt + cyl + hp + disp, Mtcars.df)
 
 ### Variance Inflation Factor
 
-The *VIF* quantify the severety of multicolinearity for each predictor. Calculating The VIF for each model defined prevously, we can see the trend of each coeficent as we add new predictors into the model. :
+The *VIF* quantify the severity of multicollinearity for each predictor. Calculating The VIF for each model defined previously, we can see the trend of each coefficient as we add new predictors into the model:
 
 ```{r, echo=FALSE}
 library(car)
