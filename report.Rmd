@@ -83,29 +83,29 @@ g <- g + ylab("Consummption [Miles / US Gallon]")
 g
 ```
 
-and we can obsereve that it seems to be a clear distinction for the two groups.
+and we can observe that it seems to be a clear distinction between the two groups.
 
-Secondly, we'are going to calculate the correlation between the non-categorical variables in order to understand which variables make sense to include in the multivariable model
+We're now going to calculate the correlation between the non-categorical variables in order to understand which variables make sense to include in the multivariable model:
 
-```{r, fig.height=4}
+```{r,  echo=FALSE, fig.height=4}
 library(corrplot)
 
 M <- cor(Mtcars.df[nonFactorVars])
 corrplot(M, method="circle")
 ```
 
-where more the dots are `blue`/`red` more the two variable are positevely/negatevely correlated. We've used the `corplot` instead of the `cor` function since that the use of the colors give a better and an immediate understanding of the correlation between couple of variables. 
+More the dots are `blue` or `red` more the two variables are positively/negatively correlated.
 
-We're using the output of `corplot` in order to choose which variable may be added into the model. We'll see in the next section two criteria that can bu used in order to avoid the well-knonw problem of variance inflation i.e. the conseguences of including predicors higly corellated each other.
+We'll see in the next section two criteria that can bu used in order to avoid the well-known problem of variance inflation i.e. the consequences of including predictors highly correlated each other.
 
-From the correlation plot we can note that:
+From the correlation plot, we can note that:
 
-+ `wt`, `disp`, `cyl` and `hp` are highly correlated with `mpg`, which leads us to candidate them as possible predicor variables;
-+ `disp` is highly correlated `cyl`, in fact exists a matematical relation between them, and we want to spear to include both in the model.
++ `wt`, `disp`, `cyl` and `hp` are highly correlated with `mpg`, which leads us to candidate them as possible predictor variables;
++ `disp` is highly correlated `cyl`, in fact, exists a mathematical relation between them, and we want to spear to include both in the model.
 
 ## Model selection
 
-Using the candidate variables from the *Exploratory Data Analysis* section we're going to create different model ( $predictors(M_i) \subset predictors(M_{i+1}),  \forall i \in \{1,2,3,4\}$ ). Using criteria like *VIF* and *Nested ANOVA test* we want to discover which variables have a good impact and a low inflation in the solution:
+Using the variables from the previous section we're going to create different model ( $predictors(M_i) \subset predictors(M_{i+1}),  \forall i \in \{1,2,3,4\}$ ). Using criteria like *VIF* and *Nested ANOVA test* we want to discover which variables have a good impact and a low inflation in the solution:
 
 ```{r}
 fit1 <- lm(mpg ~ am, Mtcars.df)
