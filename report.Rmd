@@ -211,14 +211,16 @@ g <- g + ylab("Residuals")
 g
 ```
 
-```{r echo=FALSE, eval=FALSE}
-plot(Mtcars.fitMulti)
+As we can see from the plot, and from the output of the `fit` function in section 3.1, the residuals seem to be quite uncorrelated and distributed around 0.
+
+`dfbetas` and `hatvalues` are two examples of diagnostic value and they are able to find out different problems. Like the residuals, they are calculated for each observed data, and they measure the **influence** and the **laverage**. The first indicates how much the solution changes without including the point itself. while the second indicates how much the point is far from the cloud of data. We're going now to print the output of the `hatvalues` function: 
+
+```{r}
+Mtcars.hatvalues <- hatvalues(Mtcars.fitMulti)
+
+summary(Mtcars.hatvalues)
+head(Mtcars.hatvalues[order(Mtcars.hatvalues)])
 ```
 
-
-
-
-
 # Conclusion
-
 
