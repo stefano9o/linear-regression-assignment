@@ -132,63 +132,61 @@ library(car)
 |   `fit5` (added `disp`)  | ```r vif(fit5)[1]``` | ```r vif(fit5)[2]``` | ```r vif(fit5)[3]``` | ```r vif(fit5)[4]``` | ```r vif(fit5)[5]``` |
 
 
-From the previous table we can notice that all the VIFs increase considerably after inserting `hp`.
+From the previous table, we can notice that all the VIFs increase considerably after inserting `hp`.
 
 ### Nested ANOVA Test
-The **Nested ANOVA Test** involves the use of nested model like the ones that we created for the computation of the VIF:
+The **Nested ANOVA Test** involves the use of nested models like the ones that we created for the computation of the VIF:
 
  
 ```{r, echo=FALSE}
 Mtcars.anova <- anova(fit1, fit2, fit3, fit4, fit5)
+Mtcars.anova
 ```
 
 and even here we notice that inserting `hp` and `disp` doesn't have a significant impact on the model.
 
 # Statistical inference
 
-The main goal of statiscal inference is to draw conclusion from a set of data affected by errors. In the next two section we're going to use linear models in order to answer our questions.
-The main feature of linear model is to be parsimonious, and for this reason, we are interested in including as less variables as possible.  
+The main goal of statistical inference is to draw conclusions from a set of data affected by errors. In the next two section, we're going to use linear models in order to answer our questions.
 
 ## Simple linear regression
 
-Before constructing a multivariable linear regression model, it's a good practice to start with a simple linear regression model and here below is shown some results of the `summary function`: 
+Before constructing a multivariable linear regression model, it's a good practice to start with a simple linear regression model and here below will be shown one at a time the output of the `summary function`.
 
-### Residuals
 ```{r, echo=FALSE}
 Mtcars.fitSimple <- lm(mpg ~ am, Mtcars.df)
 ```
 
-they should be normal distributed with mean `0` and at first sight they seems to be symmetric respect `0` anyway we'll plot them later.
+```{r}
+summary(resid(Mtcars.fitSimple))
+```
 
-### Coefficients
+The residuals should be normally distributed with mean `0` and, at first sight, they seem to be quite uncorrelated and symmetric respect `0`.
+
 ```{r}
 summary(Mtcars.fitSimple)$coefficients
 ```
 
-`17.147` and `1.125` are the *estimate* and the *standard error* for the reference level (automatic group);
-`7.245` and `1.764` are the *estimate* and the *stardard error* for the increase in mean for the manual group respect to the automatic group (reference level); 
+The coefficients `17.147` and `1.125` are the *estimate* and the *standard error* for the reference level (automatic group) while the coefficients `7.245` and `1.764` are the *estimate* and the *standard error* for the increase in mean for the manual group respect to the automatic group (reference level).
 
-`0.3598` is the percentage of variation explained by the model; the *Adjusted R Squared* takes into account the number of predictor used since the R squared it is a quantity that is going to increase even inserting useless predictor. 
+At this stage, since the *p-value* `0.000285` is much less than `0.05`, the difference in mean is statistically significant.
 
-### Residual standart error 
 ```{r}
 summary(Mtcars.fitSimple)$sigma
 ```
 
-whose values are interpreted as follow:
-`4,902` is the standard error from the fitted line
-
-### R squared and Adjusted R sqaured
+The Residual standard error is the standard error of the observed data from the fitted line
 
 ```{r}
-c(summary(Mtcars.fitSimple)$r.squared,summary(Mtcars.fitSimple)$adj.r.squared)
+summary(Mtcars.fitSimple)$r.squared
+
+summary(Mtcars.fitSimple)$adj.r.squared
 ```
 
-At this stage, since the *p-value* `0.000285` is much less then `0.05`, we could state that the difference in mean `7.245` it's statistically indipendent and it was by pure chance is very low. However we know that omitting other variable to our model can bring us to wrong conclusion.
+The `R-squared` `0.360` is the percentage of variation explained by the model and the `Adjusted R-squared` `0.338` mesaure the same quantity but takes also into account the number of predictors used.
 
-## Multi-variate linear regression
-
-Using the results made with the model selection methods, we are going to add `wt` and `cyl` into the multivariate regression model:
+## Multivariable linear regression
+The main feature of the linear model is to be parsimonious, and for this reason, we are interested in including as fewer variables as possible. Using the results made with the model selection methods, we are going to add `wt` and `cyl` into the multivariable regression model:
 
 ```{r}
 Mtcars.fitMulti <- lm(mpg ~ am + wt + cyl, Mtcars.df)
@@ -196,9 +194,11 @@ Mtcars.fitMulti <- lm(mpg ~ am + wt + cyl, Mtcars.df)
 summary(Mtcars.fitMulti)$coef
 ```
 
-where we can observe how after inserting `wt` and `cyl`into the model, changes the results for `am` beacuse now the difference between automatic and manual ransmission is very little and the `p-value` `0.89334` is no longer statiscal significant.
+where we can observe how after inserting `wt` and `cyl` into the model, changes the results for `am` because now the difference between automatic and manual transmission is very little and the `p-value` `0.89334` is no longer statistically significant.
 
-# Residual Analysis
+# Diagnostic and residual analysis
+
+The most important approach for understanding poor model fitting is the analysis of the residuals, which are the vertical distance of the observed data from the fitted line. In fact, they have the ability to zoom potential problems. From the theory, we know that the residuals should be uncorrelated the one from the other with mean 0, and for this reason, the plot shouldn't show any pattern. Here below it's shown the residual vs the fitted value:
 
 ```{r echo=FALSE}
 library(ggplot2)
