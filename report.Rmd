@@ -18,14 +18,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction
 
-In the report we're going to perform a simple regression analysis using `mtcars`, an R built-in dataset. In Particular we are interested in the following questions: 
+We're going to perform a simple regression analysis using `mtcars`, an R built-in dataset. In Particular, we are interested in the following questions:
 
-> + Is an automatic or manual transmission better for MPG?
-> + Quantify the MPG difference between automatic and manual transmissions
+> + Is an automatic or manual transmission better for petrol consumption?
+> + Quantify the consumption difference between automatic and manual transmissions
 
-The document is structured as follow: after having a look in the dataset, we're going to perform some basic exploratory analysis by computing the correlation matrix and showing a violin plot. In the following section we are going to perform some regression analysis, firstly using a one-variable model (`am`) and secondly adding other predictors to the model. We'll choose the varibles to include in the prevous step by using two different model-selection criteria: *VIF* and *Nested ANOVA* test. At the end we'll check the quality of the model using residual and his derivatives.
+The document is structured as follow: after having a look into the dataset, we're going to perform some basic exploratory analysis by computing the correlation matrix and showing a violin plot. After that we are going to perform some regression analysis, firstly, using a simple regression model (`am`) and secondly, adding other predictors to the model. We'll choose the variables to include in the multivariable model by using two different model-selection criteria: *VIF* and *Nested ANOVA* test. At the end, we'll check the quality of the model using residual and diagnostic values like `hatvalues` and `dfbetas`.
 
-<!-- Which are related to the null and alternative hypotesis as follow: -->
+<!-- Which is related to the null and alternative hypothesis as follow: -->
 
 <!-- + **null hypotesis**: there is no impact in consumption respect using an automatic or manual transmission (diffrence in mean equal to 0) -->
 <!-- + **alternative hypotesis** the transmission type is related to the consumption (difference in mean not equal to 0) -->
@@ -34,7 +34,7 @@ The document is structured as follow: after having a look in the dataset, we're 
 
 The dataset is composed of 32 observations with eleven variables for each observation.
 
-In addition to the variables `mpg` (consumption) and `am` (transmission type), the most interesting for our purpose are: Displscement [cu.in.] `disp`, horsepower [hp], number of cylinders `cyl`, weight `wt
+In addition to the variables `mpg` (consumption) and `am` (transmission type), the most interesting for our purpose are: displscement [cu.in.] `disp`, horsepower `hp`, number of cylinders `cyl` and weight `wt` [1000 lbs].
 
 <!-- * *mpg*: fuel consumption [Miles/(US) gallon] **outcome** -->
 <!-- * *cyl*: number of cylinders (4,6 and 8) -->
